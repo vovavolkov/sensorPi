@@ -43,7 +43,7 @@ image = Image.new("1", (width, height))
 # Get drawing object to draw on image.
 draw = ImageDraw.Draw(image)
 
-# Draw a black filled box to clear the image.
+# Draw a black filled box to clear the canvas for draw method.
 draw.rectangle((0, 0, width, height), outline=0, fill=0)
 
 # Draw some shapes.
@@ -55,12 +55,12 @@ bottom = height - padding
 x = 0
 
 # Load default font.
-font = ImageFont.load_default()
+# font = ImageFont.load_default()
 
 # Alternatively load a TTF font.  Make sure the .ttf font file is in the
 # same directory as the python script!
 # Some other nice fonts to try: http://www.dafont.com/bitmap.php
-# font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 9)
+font = ImageFont.truetype('Minecraftia-Regular.ttf', 8)
 
 def drawString(offset, text):
     draw.text((0, top+offset), text, font=font, fill=255)
@@ -76,17 +76,20 @@ def cleanup(signal, frame):
 signal.signal(signal.SIGINT, cleanup)
 signal.signal(signal.SIGTERM, cleanup)
 
-sensor_status = (lambda x: "Sensor " + ("OK" if x else "Unavailable"))(sensorOK)
+sensor_status = (lambda x: "Sensor OK" if x else "NO SENSOR, values random")(sensorOK)
 
 while True:
+    # clear the canvas
     draw.rectangle((0, 0, width, height), outline=0, fill=0)
     drawString(0, sensor_status)
 
-    co2 = random.randint(200, 2000)
+    co2 = int(random.gauss(1000,100))
     drawString(8, "CO2: " + str(co2) + " ppm")
-    humidity = round(random.uniform(0, 100),2)
+
+    humidity = round(random.gauss(50, 13),2)
     drawString(16, "Humidity: " + str(humidity) + " %")
-    temperature = round(random.uniform(0, 100),2)
+
+    temperature = round(random.gauss(15, 10),2)
     drawString(25, "Temp: " + str(temperature) + " *C")
     
     # Display image.
