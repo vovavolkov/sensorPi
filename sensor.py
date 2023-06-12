@@ -2,8 +2,9 @@
 
 import time
 import random
-import subprocess
+import sqlite3
 import signal
+import board
 from board import SCL, SDA, D4
 import busio
 import digitalio
@@ -11,24 +12,29 @@ from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1305
 import adafruit_scd4x
 
+conn = sqlite3.connect('readings.db')
+cursor = conn.cursor()
+cursor.execute("CREATE TABLE IF NOT EXISTS readings (id INTEGER PRIMARY KEY AUTOINCREMENT, co2 INTEGER, temperature REAL, humidity REAL, time DATETIME DEFAULT CURRENT_TIMESTAMP)")
+
 # Define the Reset Pin
 oled_reset = digitalio.DigitalInOut(D4)
                                                                     
-# Create the I2C interface.
-i2c = busio.I2C(SCL, SDA)
+# Create the I2C interface for the OLED display.
+disp_i2c = busio.I2C(SCL, SDA)
  
 # Create the SSD1305 OLED class.
-disp = adafruit_ssd1305.SSD1305_I2C(128, 32, i2c, reset=oled_reset) 
+disp = adafruit_ssd1305.SSD1305_I2C(128, 32, disp_i2c, reset=oled_reset) 
 
 # try to initialise the sensor, catching errors
-try:
-    i2c = board.I2C()
-    sensor = adafruit_scd4x.SCD4X(i2c)
-    sensorOK = True
+#try:
+sensor_i2c = board.I2C()
+scd4x  = adafruit_scd4x.SCD4X(sensor_i2c)
+sensorOK = True
+print("Serial number:", [hex(i) for i in scd4x.serial_number])
 
-except Exception:
-    sensorOK=False
-    print("Sensor not initialised")
+#except Exception:
+#    sensorOK=False
+#    print("Sensor not initialised")
 
 # Clear display
 disp.fill(0)
@@ -67,9 +73,10 @@ def drawString(offset, text):
 
 def cleanup(signal, frame):
     # clear switch off display before exiting.
+    conn.close()
     disp.fill(0)
     disp.show()
-    print("Display turned off.")
+    print("Display turned off, changes commited.")
     exit(0)
 
 # Register the cleanup function to run when the script is terminated.
@@ -78,64 +85,48 @@ signal.signal(signal.SIGTERM, cleanup)
 
 sensor_status = (lambda x: "Sensor OK" if x else "NO SENSOR, values random")(sensorOK)
 
-while True:
-    # clear the canvas
-    draw.rectangle((0, 0, width, height), outline=0, fill=0)
-    drawString(0, sensor_status)
-
-    co2 = int(random.gauss(1000,100))
-    drawString(8, "CO2: " + str(co2) + " ppm")
-
-    humidity = round(random.gauss(50, 13),2)
-    drawString(16, "Humidity: " + str(humidity) + " %")
-
-    temperature = round(random.gauss(15, 10),2)
-    drawString(25, "Temp: " + str(temperature) + " *C")
-    
-    # Display image.
-    disp.image(image)
-    disp.show()
-    time.sleep(2)
-
 #while True:
-#    # Draw a black filled box to clear the image.
+#    # clear the canvas
 #    draw.rectangle((0, 0, width, height), outline=0, fill=0)
+#    drawString(0, sensor_status)
 #
-#    cmd = "iwgetid -r"
-#    try:
-#        SSID = subprocess.check_output(cmd, shell=True, timeout=5).decode("utf-8").strip()
-#    except subprocess.CalledProcessError:
-#        SSID = "Not connected"
-#    except subprocess.TimeoutExpired:
-#        SSID = "Timeout"
+#    co2 = int(random.gauss(1000,100))
+#    drawString(8, "CO2: " + str(co2) + " ppm")
 #
-#    # Shell scripts for system monitoring from here:
-#    # https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
+#    humidity = round(random.gauss(50, 13),2)
+#    drawString(16, "Humidity: " + str(humidity) + " %")
 #
-#    # cmd = "hostname -I | cut -d' ' -f1"
-#    # IP = subprocess.check_output(cmd, shell=True).decode("utf-8")
-#
-#    cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
-#    CPU = subprocess.check_output(cmd, shell=True).decode("utf-8")
-#
-#    cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%s MB  %.2f%%\", $3,$2,$3*100/$2 }'"
-#    MemUsage = subprocess.check_output(cmd, shell=True).decode("utf-8")
-#
-#    # cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %d/%d GB  %s", $3,$2,$5}\''
-#    # Disk = subprocess.check_output(cmd, shell=True).decode("utf-8")
-#
-#    current_time = time.strftime("%H:%M:%S")
-#
-#    # Write four lines of text.
-#
-#    draw.text((x, top + 0), "SSID: " + SSID, font=font, fill=255)
-#    draw.text((x, top + 8), "Time: " + current_time, font=font, fill=255)
-#    # draw.text((x, top + 0), "IP: " + IP, font=font, fill=255)
-#    draw.text((x, top + 16), CPU, font=font, fill=255)
-#    draw.text((x, top + 25), MemUsage, font=font, fill=255)
-#    # draw.text((x, top + 25), Disk, font=font, fill=255)
-#
+#    temperature = round(random.gauss(15, 10),2)
+#    drawString(25, "Temp: " + str(temperature) + " *C")
+#    
 #    # Display image.
 #    disp.image(image)
 #    disp.show()
-#    time.sleep(0.1)
+#    time.sleep(2)
+
+scd4x.start_periodic_measurement()
+
+while True:
+    if scd4x.data_ready:
+
+        co2 = scd4x.CO2
+        temperature = scd4x.temperature
+        humidity = scd4x.relative_humidity
+        
+        temp_4dp = "%.4f" % temperature
+        hum_4dp = "%.4f" % humidity
+
+        cursor.execute("INSERT INTO readings (co2, temperature, humidity) VALUES (?, ?, ?)", (co2, temp_4dp, hum_4dp))
+        conn.commit() 
+
+        # print the values on the display 
+        draw.rectangle((0, 0, width, height), outline=0, fill=0)
+        drawString(0, sensor_status)
+        drawString(8, "CO2: %d ppm" % co2)
+        drawString(16, "Temp: %0.2f *C" % temperature)
+        drawString(24, "Hum: %0.2f %%" % humidity)
+
+        disp.image(image)
+        disp.show()
+
+    time.sleep(1)
