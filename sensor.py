@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import argparse
 import time
 import random
 import sqlite3
@@ -12,29 +13,38 @@ from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1305
 import adafruit_scd4x
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--dark", help="no display", action="store_true")
+args = parser.parse_args()
+
+print(args.dark)
+
+
 conn = sqlite3.connect('readings.db')
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS readings (id INTEGER PRIMARY KEY AUTOINCREMENT, co2 INTEGER, temperature REAL, humidity REAL, time DATETIME DEFAULT CURRENT_TIMESTAMP)")
 
-# Define the Reset Pin
-oled_reset = digitalio.DigitalInOut(D4)
-                                                                    
-# Create the I2C interface for the OLED display.
-disp_i2c = busio.I2C(SCL, SDA)
- 
-# Create the SSD1305 OLED class.
-disp = adafruit_ssd1305.SSD1305_I2C(128, 32, disp_i2c, reset=oled_reset) 
 
 # try to initialise the sensor, catching errors
 #try:
 sensor_i2c = board.I2C()
 scd4x  = adafruit_scd4x.SCD4X(sensor_i2c)
 sensorOK = True
-print("Serial number:", [hex(i) for i in scd4x.serial_number])
+print("Sensor connected\nSerial number:", [hex(i) for i in scd4x.serial_number])
 
 #except Exception:
 #    sensorOK=False
 #    print("Sensor not initialised")
+
+
+# Define the Reset Pin for the display
+oled_reset = digitalio.DigitalInOut(D4)
+
+# Create the I2C interface for the OLED display.
+disp_i2c = busio.I2C(SCL, SDA)
+
+# Create the SSD1305 OLED class.
+disp = adafruit_ssd1305.SSD1305_I2C(128, 32, disp_i2c, reset=oled_reset) 
 
 # Clear display
 disp.fill(0)
@@ -76,7 +86,7 @@ def cleanup(signal, frame):
     conn.close()
     disp.fill(0)
     disp.show()
-    print("Display turned off, changes commited.")
+    print("\nDisplay turned off, changes commited.")
     exit(0)
 
 # Register the cleanup function to run when the script is terminated.
@@ -118,7 +128,9 @@ while True:
 
         cursor.execute("INSERT INTO readings (co2, temperature, humidity) VALUES (?, ?, ?)", (co2, temp_4dp, hum_4dp))
         conn.commit() 
-
+        
+        if args.dark:
+            continue
         # print the values on the display 
         draw.rectangle((0, 0, width, height), outline=0, fill=0)
         drawString(0, sensor_status)
