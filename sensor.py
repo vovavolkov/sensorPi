@@ -4,21 +4,24 @@ import argparse
 import time
 import random
 import sqlite3
-import signal
-import board
-from board import SCL, SDA, D4
-import busio
-import digitalio
-from PIL import Image, ImageDraw, ImageFont
-import adafruit_ssd1305
-import adafruit_scd4x
+#import signal
+#import board
+#from board import SCL, SDA, D4
+#import busio
+#import digitalio
+#from PIL import Image, ImageDraw, ImageFont
+#import adafruit_ssd1305
+#import adafruit_scd4x
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--dark", help="no display", action="store_true")
+parser.add_argument('-d', '--dark', action='store_true', help="no display")
+parser.add_argument('table', default='readings', help='table for readings')
 args = parser.parse_args()
 
 print(args.dark)
+print(args.table)
 
+exit(0)
 
 conn = sqlite3.connect('readings.db')
 cursor = conn.cursor()
@@ -122,13 +125,13 @@ while True:
         co2 = scd4x.CO2
         temperature = scd4x.temperature
         humidity = scd4x.relative_humidity
-        
+
         temp_4dp = "%.4f" % temperature
         hum_4dp = "%.4f" % humidity
 
         cursor.execute("INSERT INTO readings (co2, temperature, humidity) VALUES (?, ?, ?)", (co2, temp_4dp, hum_4dp))
         conn.commit() 
-        
+
         if args.dark:
             continue
         # print the values on the display 
