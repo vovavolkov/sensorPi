@@ -15,17 +15,15 @@ import sqlite3
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--dark', action='store_true', help="no display")
-parser.add_argument('table', default='readings', help='table for readings')
+parser.add_argument('table', default="readings", nargs ='?', help='table for readings')
 args = parser.parse_args()
 
-print(args.dark)
-print(args.table)
-
+print(args)
 exit(0)
 
 conn = sqlite3.connect('readings.db')
 cursor = conn.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS readings (id INTEGER PRIMARY KEY AUTOINCREMENT, co2 INTEGER, temperature REAL, humidity REAL, time DATETIME DEFAULT CURRENT_TIMESTAMP)")
+cursor.execute(f"CREATE TABLE IF NOT EXISTS {args.table} (id INTEGER PRIMARY KEY AUTOINCREMENT, co2 INTEGER, temperature REAL, humidity REAL, time DATETIME DEFAULT CURRENT_TIMESTAMP)")
 
 
 # try to initialise the sensor, catching errors
@@ -129,7 +127,7 @@ while True:
         temp_4dp = "%.4f" % temperature
         hum_4dp = "%.4f" % humidity
 
-        cursor.execute("INSERT INTO readings (co2, temperature, humidity) VALUES (?, ?, ?)", (co2, temp_4dp, hum_4dp))
+        cursor.execute(f"INSERT INTO {args.table} (co2, temperature, humidity) VALUES ({co2}, {temp_4dp}, {hum_4dp})"
         conn.commit() 
 
         if args.dark:
