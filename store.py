@@ -1,16 +1,22 @@
 import sqlite3
+import argparse
 import random
 
-conn = sqlite3.connect('readings.db')
-curs = conn.cursor()
+parser = argparse.ArgumentParser()
+parser.add_argument('table', default="readings", nargs ='?', help='table for readings')
+args = parser.parse_args()
 
-curs.execute("CREATE TABLE IF NOT EXISTS readings (id INTEGER PRIMARY KEY AUTOINCREMENT, co2 INTEGER, temp REAL, hum REAL, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+print(args)
 
-co2 = random.randint(0, 1000)
-temp = round(random.uniform(0, 50), 2)
-hum = round(random.uniform(0, 100), 2)
+conn = sqlite3.connect('tests.db')
+cursor = conn.cursor()
 
-curs.execute("INSERT INTO readings (co2, temp, hum) VALUES (?, ?, ?)", (co2, temp, hum))
+cursor.execute(f"CREATE TABLE IF NOT EXISTS {args.table} (id INTEGER PRIMARY KEY AUTOINCREMENT, co2 INTEGER, temperature REAL, humidity REAL, time DATETIME DEFAULT CURRENT_TIMESTAMP)")
 
+co2 = int(random.gauss(1000,100))
+humidity = round(random.gauss(50, 13),2)
+temperature = round(random.gauss(15, 10),2)
+
+cursor.execute(f"INSERT INTO {args.table} (co2, temperature, humidity) VALUES ({co2}, {temperature}, {humidity})")
 conn.commit()
 conn.close()
