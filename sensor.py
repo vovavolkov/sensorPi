@@ -136,8 +136,8 @@ while True:
         draw.rectangle((0, 0, width, height), outline=0, fill=0)
         drawString(0, sensor_status)
         drawString(8, "CO2: %d ppm" % co2)
-        drawString(16, "Temp: %0.2f *C" % temperature)
-        drawString(24, "Hum: %0.2f %%" % humidity)
+        drawString(16, "Temp: %f *C" % temp_4dp)
+        drawString(24, "Hum: %f %%" % hum_4dp)
 
         disp.image(image)
         disp.show()
