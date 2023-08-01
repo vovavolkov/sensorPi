@@ -127,7 +127,7 @@ while True:
         temp_4dp = "%.4f" % temperature
         hum_4dp = "%.4f" % humidity
 
-        cursor.execute(f"INSERT INTO {args.table} (co2, temperature, humidity) VALUES ({co2}, {temp_4dp}, {hum_4dp})"
+        cursor.execute(f"INSERT INTO {args.table} (co2, temperature, humidity) VALUES ({co2}, {temp_4dp}, {hum_4dp})")
         conn.commit() 
 
         if args.dark:
