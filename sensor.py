@@ -4,14 +4,14 @@ import argparse
 import time
 import random
 import sqlite3
-#import signal
-#import board
-#from board import SCL, SDA, D4
-#import busio
-#import digitalio
-#from PIL import Image, ImageDraw, ImageFont
-#import adafruit_ssd1305
-#import adafruit_scd4x
+import signal
+import board
+from board import SCL, SDA, D4
+import busio
+import digitalio
+from PIL import Image, ImageDraw, ImageFont
+import adafruit_ssd1305
+import adafruit_scd4x
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--dark', action='store_true', help="no display")
@@ -19,12 +19,13 @@ parser.add_argument('table', default="readings", nargs ='?', help='table for rea
 args = parser.parse_args()
 
 print(args)
-exit(0)
 
 conn = sqlite3.connect('readings.db')
 cursor = conn.cursor()
-cursor.execute(f"CREATE TABLE IF NOT EXISTS {args.table} (id INTEGER PRIMARY KEY AUTOINCREMENT, co2 INTEGER, temperature REAL, humidity REAL, time DATETIME DEFAULT CURRENT_TIMESTAMP)")
-
+cursor.execute(f"CREATE TABLE IF NOT EXISTS {args.table}"
+               "(id INTEGER PRIMARY KEY AUTOINCREMENT,"
+               "co2 INTEGER, temperature REAL, humidity REAL,"
+               "time DATETIME DEFAULT CURRENT_TIMESTAMP)")
 
 # try to initialise the sensor, catching errors
 #try:
@@ -120,24 +121,31 @@ scd4x.start_periodic_measurement()
 while True:
     if scd4x.data_ready:
 
+        # fetch the values from the sensor
         co2 = scd4x.CO2
-        temperature = scd4x.temperature
-        humidity = scd4x.relative_humidity
+        temperature = round(scd4x.temperature, 4)
+        humidity = round(scd4x.relative_humidity, 2)
 
-        temp_4dp = "%.4f" % temperature
-        hum_4dp = "%.4f" % humidity
-
-        cursor.execute(f"INSERT INTO {args.table} (co2, temperature, humidity) VALUES ({co2}, {temp_4dp}, {hum_4dp})")
+        # write the values to the database
+        cursor.execute(f"INSERT INTO {args.table}"
+                       f"(co2, temperature, humidity)"
+                       f"VALUES ({co2}, {temperature}, {humidity})")
         conn.commit() 
 
+        # skip the display if the -d(ark) flag is set
         if args.dark:
             continue
+
         # print the values on the display 
         draw.rectangle((0, 0, width, height), outline=0, fill=0)
+
         drawString(0, sensor_status)
-        drawString(8, "CO2: %d ppm" % co2)
-        drawString(16, "Temp: %f *C" % temp_4dp)
-        drawString(24, "Hum: %f %%" % hum_4dp)
+
+        drawString(8, f"CO2: {co2} ppm")
+
+        drawString(16, f"Temp: {temperature} *C")
+
+        drawString(25, f"Hum: {humidity} %")
 
         disp.image(image)
         disp.show()
