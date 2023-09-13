@@ -78,7 +78,7 @@ x = 0
 # Alternatively load a TTF font.  Make sure the .ttf font file is in the
 # same directory as the python script!
 # Some other nice fonts to try: http://www.dafont.com/bitmap.php
-font = ImageFont.truetype('Minecraftia-Regular.ttf', 8)
+font = ImageFont.truetype('assets/Minecraftia-Regular.ttf', 8)
 
 def drawString(offset, text):
     draw.text((0, top+offset), text, font=font, fill=255)
