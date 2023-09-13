@@ -95,6 +95,14 @@ def cleanup(signal, frame):
 signal.signal(signal.SIGINT, cleanup)
 signal.signal(signal.SIGTERM, cleanup)
 
+def toggleDisplay(signal, frame):
+    args.dark = not args.dark
+    print("Display is now:", "OFF" if args.dark else "ON")
+    disp.fill(0)
+    disp.show()
+
+signal.signal(signal.SIGUSR1, toggleDisplay)
+
 sensor_status = (lambda x: "Sensor OK" if x else "NO SENSOR, values random")(sensorOK)
 
 #while True:
