@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1305
 import adafruit_scd4x
 
-# Define available command line arguments and fetch them)
+# Define available command line arguments and fetch them
 parser = argparse.ArgumentParser()
 parser.add_argument(
     '-d', '--dark',
@@ -143,7 +143,7 @@ while True:
         temperature = round(scd4x.temperature, 4)
         humidity = round(scd4x.relative_humidity, 2)
 
-        # Inser the new values to the table
+        # Insert the new values into the table
         cursor.execute(
             f"INSERT INTO {args.table}"
             "(co2, temperature, humidity, time)"
