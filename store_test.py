@@ -13,7 +13,7 @@ args = parser.parse_args()
 print(args)
 
 # Connect to the database 'tests.db'
-conn = sqlite3.connect("tests.db")
+conn = sqlite3.connect("db/tests.db")
 cursor = conn.cursor()
 # Create a table specified in command arguments, if it doesn't exist
 cursor.execute(
