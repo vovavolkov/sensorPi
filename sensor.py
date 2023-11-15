@@ -111,27 +111,17 @@ signal.signal(signal.SIGUSR1, toggleDisplay)
 
 sensor_status = (
     lambda x: "Sensor OK" if x
-    else "NO SENSOR, values random")
-    (sensorOK)
+    else "NO Sensor"(sensorOK))
 
-#while True:
-#    # clear the canvas
-#    draw.rectangle((0, 0, width, height), outline=0, fill=0)
-#    drawString(0, sensor_status)
-#
-#    co2 = int(random.gauss(1000,100))
-#    drawString(8, "CO2: " + str(co2) + " ppm")
-#
-#    humidity = round(random.gauss(50, 13),2)
-#    drawString(16, "Humidity: " + str(humidity) + " %")
-#
-#    temperature = round(random.gauss(15, 10),2)
-#    drawString(25, "Temp: " + str(temperature) + " *C")
-#    
-#    # Display image.
-#    disp.image(image)
-#    disp.show()
-#    time.sleep(2)
+
+if not sensorOK:
+    print(sensor_status)
+    if not args.dark:
+        draw.rectangle((0, 0, width, height), outline=0, fill=0)
+        drawString(0, sensor_status)
+        disp.image(image)
+        disp.show()
+    exit(1)
 
 scd4x.start_periodic_measurement()
 
