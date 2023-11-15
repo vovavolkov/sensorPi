@@ -20,6 +20,10 @@ humidity = [v[3] for v in values]
 
 times = pd.to_datetime(times)
 
+first_date = times[0].strftime("%Y-%m-%d")
+last_date = times[-1].strftime("%Y-%m-%d")
+
+
 def plot(x_axis,y_axis,x_label,y_label,title):
     fig = Figure()
 
