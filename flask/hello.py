@@ -7,13 +7,7 @@ import sqlite3
 
 app = Flask(__name__)
 
-
-#name = "bob"
-#@app.route('/name')
-#def hello():
-#	return f"Hello, {escape(name)}"
-
-conn = sqlite3.connect("/Users/vova/stuff/sensorPi/tests.db")
+conn = sqlite3.connect("tests.db")
 cursor = conn.cursor()
 cursor.execute("SELECT time, co2, temperature, humidity from readings")
 
