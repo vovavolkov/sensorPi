@@ -1,17 +1,17 @@
 #!/usr/bin/python
 
 import argparse
-import time
-import random
-import sqlite3
 import signal
+import sqlite3
+import time
+
+import adafruit_scd4x
+import adafruit_ssd1305
 import board
-from board import SCL, SDA, D4
 import busio
 import digitalio
 from PIL import Image, ImageDraw, ImageFont
-import adafruit_ssd1305
-import adafruit_scd4x
+from board import SCL, SDA, D4
 
 # Define available command line arguments and fetch them
 parser = argparse.ArgumentParser()
