@@ -1,7 +1,7 @@
-import sqlite3
 import argparse
-import random
 import datetime
+import random
+import sqlite3
 
 # Define available command line arguments and fetch them
 parser = argparse.ArgumentParser()
@@ -38,12 +38,13 @@ for i in range(n):
     # Add 5 seconds to the timestamp to emulate collection frequency
     date = date + datetime.timedelta(seconds=5)
     date_str = date.strftime("%Y-%m-%d %H:%M:%S")
+
     # Insert the new values into the table
     cursor.execute(
         f"INSERT INTO {args.table}"
         "(co2, temperature, humidity, time)"
-        "VALUES ({co2}, {temperature},"
-        "{humidity},'{date_str}')")
+        f"VALUES ({co2}, {temperature}, {humidity}, '{date_str}')"
+    )
 
 conn.commit()
 conn.close()
