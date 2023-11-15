@@ -127,7 +127,6 @@ scd4x.start_periodic_measurement()
 
 while True:
     if scd4x.data_ready:
-
         # Fetch the readings from the sensor
         co2 = scd4x.CO2
         temperature = round(scd4x.temperature, 4)
@@ -136,9 +135,8 @@ while True:
         # Insert the new values into the table
         cursor.execute(
             f"INSERT INTO {args.table}"
-            "(co2, temperature, humidity, time)"
-            "VALUES ({co2}, {temperature},"
-            "{humidity},'{date_str}')")
+            f"(co2, temperature, humidity)"
+            f"VALUES ({co2}, {temperature}, {humidity})")
         conn.commit() 
 
         # Skip the display if the -d(ark) flag is set
@@ -158,4 +156,5 @@ while True:
         disp.image(image)
         disp.show()
 
+    # Wait for 1 second before repeating
     time.sleep(1)
