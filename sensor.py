@@ -35,16 +35,16 @@ cursor.execute(
     "co2 INTEGER, temperature REAL, humidity REAL,"
     "time DATETIME DEFAULT CURRENT_TIMESTAMP)")
 
-# try to initialise the sensor, catching errors
-#try:
-sensor_i2c = board.I2C()
-scd4x  = adafruit_scd4x.SCD4X(sensor_i2c)
-sensorOK = True
-print("Sensor connected\nSerial number:", [hex(i) for i in scd4x.serial_number])
+#try to initialise the sensor, catching errors
+try:
+    sensor_i2c = board.I2C()
+    scd4x  = adafruit_scd4x.SCD4X(sensor_i2c)
+    sensorOK = True
+    print("Sensor connected\nSerial number:", [hex(i) for i in scd4x.serial_number])
 
-#except Exception:
-#    sensorOK=False
-#    print("Sensor not initialised")
+except Exception:
+    sensorOK=False
+    print("Sensor not initialised")
 
 
 # Define the Reset Pin for the display
