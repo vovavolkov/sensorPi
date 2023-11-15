@@ -1,10 +1,7 @@
+import base64
 from flask import Flask, render_template
 from io import BytesIO
-from markupsafe import escape
 from matplotlib.figure import Figure
-import base64
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import sqlite3
 
