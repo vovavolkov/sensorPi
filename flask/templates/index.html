@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<link rel="stylesheet" href="/flask/static/style.css" />
-		<link rel="icon" href="/flask/static/favicon.svg" />
+		<link rel="stylesheet" href="/style.css"/>
+		<link rel="icon" href="/favicon.svg"/>
 		<title>sensorPi</title>
 	</head>
 	<body>
@@ -13,9 +13,9 @@
             </label>
             <input type="submit" name="request" value="Request">
         </p>
-		<img src=/flask/static/dog.jpeg alt="a beagle dog">
+		<img src=/dog.jpeg alt="a beagle dog">
 		<ul id="images">
-			{% for item in images%}
+			{% for item in images %}
 			<p><img src="{{item}}" alt="image"></p>
 			{% endfor %}
 		</ul>
