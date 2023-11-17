@@ -7,7 +7,7 @@ import sqlite3
 
 app = Flask(__name__)
 
-conn = sqlite3.connect("tests.db")
+conn = sqlite3.connect("db/tests.db")
 cursor = conn.cursor()
 cursor.execute("SELECT time, co2, temperature, humidity from readings")
 
