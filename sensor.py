@@ -25,8 +25,8 @@ args = parser.parse_args()
 print(args)
 
 # Connect to the database 'readings.db'
-conn = sqlite3.connect('db/readings.db')
-cursor = conn.cursor()
+connector = sqlite3.connect('db/readings.db')
+cursor = connector.cursor()
 # Create a table specified in command arguments, if it doesn't exist
 cursor.execute(
     f"CREATE TABLE IF NOT EXISTS {args.table}"
@@ -41,23 +41,25 @@ oled_reset = digitalio.DigitalInOut(D4)
 disp_i2c = busio.I2C(SCL, SDA)
 
 # Create the SSD1305 display class.
-disp = adafruit_ssd1305.SSD1305_I2C(128, 32, disp_i2c, reset=oled_reset) 
+display = adafruit_ssd1305.SSD1305_I2C(128, 32, disp_i2c, reset=oled_reset)
 
 # Clear display
-disp.fill(0)
-disp.show()
+display.fill(0)
+display.show()
 
 # Create blank image for drawing
 # Create image with mode '1' for 1-bit color
-width = disp.width
-height = disp.height
+width = display.width
+height = display.height
 image = Image.new("1", (width, height))
 
 # Get drawing object to draw on image
 draw = ImageDraw.Draw(image)
 
+
 # Draw a black filled box to clear the canvas for draw method
-draw.rectangle((0, 0, width, height), outline=0, fill=0)
+def clear_canvas():
+    draw.rectangle((0, 0, width, height), outline=0, fill=0)
 
 # Draw some shapes.
 # First define some constants to allow easy resizing of shapes
@@ -87,18 +89,18 @@ except Exception:
     sensorOK = False
     print("Sensor not found")
     if not args.dark:
-        draw.rectangle((0, 0, width, height), outline=0, fill=0)
+        clear_canvas()
         draw_string(0, "Sensor not found")
-        disp.image(image)
-        disp.show()
+        display.image(image)
+        display.show()
     exit(1)
 
 
 # Cleanup function - fills display with black, i.e. switches it off
 def cleanup(signal, frame):
     conn.close()
-    disp.fill(0)
-    disp.show()
+    display.fill(0)
+    display.show()
     print("\nDisplay turned off, changes committed.")
     exit(0)
 
@@ -112,8 +114,8 @@ signal.signal(signal.SIGTERM, cleanup)
 def toggle_display(signal, frame):
     args.dark = not args.dark
     print("Display is now:", "OFF" if args.dark else "ON")
-    disp.fill(0)
-    disp.show()
+    display.fill(0)
+    display.show()
 
 
 # Display toggle is triggered by kill -USR1 signal.
@@ -138,10 +140,8 @@ while True:
         # Skip the display if the -d(ark) flag is set
         if args.dark:
             continue
-
-        # Create a blank canvas to print out the new values
-        draw.rectangle((0, 0, width, height), outline=0, fill=0)
-
+            
+        clear_canvas()
         # Add text strings to the canvas
         draw_string(0, "Sensor OK")
         draw_string(8, f"CO2: {co2} ppm")
@@ -149,8 +149,8 @@ while True:
         draw_string(25, f"Hum: {humidity} %")
 
         # Push the canvas onto the display
-        disp.image(image)
-        disp.show()
+        display.image(image)
+        display.show()
 
     # Wait for 1 second before repeating
     time.sleep(1)
