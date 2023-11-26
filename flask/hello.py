@@ -23,31 +23,29 @@ def plot(x_axis, y_axis, x_label, y_label, title):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    global date
+    conn = sqlite3.connect("db/tests.db")
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT time, co2, temperature, humidity from {table}")
+    values = cursor.fetchall()
+
+    times = [v[0] for v in values]
+    co2 = [v[1] for v in values]
+    temperature = [v[2] for v in values]
+    humidity = [v[3] for v in values]
+
+    first_date = times[0]
+    last_date = times[-1]
+    times = pd.to_datetime(times)
+    date = last_date
     if request.method == 'POST':
         date = request.form['date']
-        return redirect('/')
-    else:
-        conn = sqlite3.connect("db/tests.db")
-        cursor = conn.cursor()
-        cursor.execute(f"SELECT time, co2, temperature, humidity from {table}")
-        values = cursor.fetchall()
 
-        times = [v[0] for v in values]
-        co2 = [v[1] for v in values]
-        temperature = [v[2] for v in values]
-        humidity = [v[3] for v in values]
-
-        times = pd.to_datetime(times)
-        first_date = times[0]
-        last_date = times[-1]
-
-        current_co2 = co2[-1]
-        co2_str = plot(times, co2, "date", "co2", "CO2 over time")
-        temp_str = plot(times, temperature, "date", "temperature", "Temperature over time")
-        hum_str = plot(times, humidity, "date", "humidity", "Humidity over time")
-        graphs = [co2_str, temp_str, hum_str]
-        return render_template(
-            'index.html', co2=current_co2, graphs=graphs, selected_date=date,
-            first_date=first_date, last_date=last_date
-        )
+    current_co2 = co2[-1]
+    co2_str = plot(times, co2, "date", "co2", "CO2 over time")
+    temp_str = plot(times, temperature, "date", "temperature", "Temperature over time")
+    hum_str = plot(times, humidity, "date", "humidity", "Humidity over time")
+    graphs = [co2_str, temp_str, hum_str]
+    return render_template(
+        'index.html', co2=current_co2, graphs=graphs, selected_date=date,
+        first_date=first_date, last_date=last_date
+    )
