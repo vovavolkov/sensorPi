@@ -1,6 +1,7 @@
 import base64
 import sqlite3
 from io import BytesIO
+import datetime
 
 import pandas as pd
 from flask import Flask, render_template, request, redirect
@@ -15,6 +16,7 @@ def plot(x_axis, y_axis, x_label, y_label, title):
     ax = fig.subplots()
     ax.plot(x_axis, y_axis)
     ax.set(xlabel=x_label, ylabel=y_label, title=title)
+    ax.set_xticks(ax.get_xticks()[::(len(x_axis) // 100)])
     buffer = BytesIO()
     fig.savefig(buffer, format="png")
     data = base64.b64encode(buffer.getbuffer()).decode("ascii")
@@ -25,22 +27,30 @@ def plot(x_axis, y_axis, x_label, y_label, title):
 def index():
     conn = sqlite3.connect("db/readings.db")
     cursor = conn.cursor()
-    cursor.execute(f"SELECT time, co2, temperature, humidity from {table}")
-    values = cursor.fetchall()
-
-    times = [v[0] for v in values]
-    co2 = [v[1] for v in values]
-    temperature = [v[2] for v in values]
-    humidity = [v[3] for v in values]
-
-    first_date = times[0]
-    last_date = times[-1]
+    cursor.execute(f"SELECT time from {table}")
+    times = [t[0] for t in cursor.fetchall()]
     times = pd.to_datetime(times)
+    first_date = times[0].strftime("%Y-%m-%d")
+    last_date = times[-1].strftime("%Y-%m-%d")
     date = last_date
     if request.method == 'POST':
         date = request.form['date']
 
-    current_co2 = co2[-1]
+    cursor.execute(f"SELECT time, co2, temperature, humidity from {table} where time like '{date}%'")
+    try:
+        values = cursor.fetchall()
+        times = [v[0].split(" ")[1] for v in values]
+        co2 = [v[1] for v in values]
+        temperature = [v[2] for v in values]
+        humidity = [v[3] for v in values]
+        current_co2 = co2[-1]
+    except IndexError:
+        current_co2 = 0
+        times = []
+        co2 = []
+        temperature = []
+        humidity = []
+
     co2_str = plot(times, co2, "date", "co2", "CO2 over time")
     temp_str = plot(times, temperature, "date", "temperature", "Temperature over time")
     hum_str = plot(times, humidity, "date", "humidity", "Humidity over time")
