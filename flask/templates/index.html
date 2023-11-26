@@ -6,15 +6,22 @@
 		<title>sensorPi</title>
 	</head>
 	<body>
-		<h1> Current co2 level: {{ co2 }} </h1>
-        <a href="/date">Select date</a>
+        <h1> sensorPi </h1>
         <p>
-            Selected date: {{ selected_date }}
+            Select the date to view data from that day.
         </p>
-		<ul id="graphs">
-			{% for graph in graphs %}
-			<p><img src="{{graph}}" alt="image"></p>
-			{% endfor %}
-		</ul>
+        <form method="post">
+            <label for="title">Date</label>
+            <label>
+                <input type="date" name="date" max={{ last_date }} value={{ last_date }}>
+            </label>
+            <button type="submit">Submit</button>
+        </form>
+        Selected date: {{ selected_date }}
+        <ul id="graphs">
+            {% for graph in graphs %}
+                <p><img src="{{graph}}" alt="image"></p>
+            {% endfor %}
+        </ul>
 	</body>
 </html>
