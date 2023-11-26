@@ -28,21 +28,29 @@ def plot(x_axis, y_axis, x_label, y_label, title):
     ax = fig.subplots()
     ax.plot(x_axis, y_axis)
     ax.set(xlabel=x_label, ylabel=y_label, title=title)
-
-    buf = BytesIO()
-    fig.savefig(buf, format="png")
-    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    buffer = BytesIO()
+    fig.savefig(buffer, format="png")
+    data = base64.b64encode(buffer.getbuffer()).decode("ascii")
     return f"data:image/png;base64,{data}"
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     current_co2 = co2[-1]
     co2_str = plot(times, co2, "date", "co2", "CO2 over time")
     temp_str = plot(times, temperature, "date", "temperature", "Temperature over time")
     hum_str = plot(times, humidity, "date", "humidity", "Humidity over time")
-    images_list = [co2_str, temp_str, hum_str]
+    graphs = [co2_str, temp_str, hum_str]
     return render_template(
-        'index.html', co2=current_co2, first_date=first_date,
-        last_date=last_date, images=images_list
+        'index.html', co2=current_co2, graphs=graphs, selected_date=date
     )
+
+
+@app.route('/date', methods=['GET', 'POST'])
+def date():
+    if request.method == 'POST':
+        global date
+        date = request.form['date']
+        return redirect('/')
+    else:
+        return render_template('date.html', first_date=first_date, last_date=last_date)
