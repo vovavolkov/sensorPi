@@ -59,3 +59,6 @@ def index():
         'index.html', co2=current_co2, graphs=graphs, selected_date=date,
         first_date=first_date, last_date=last_date
     )
+
+if __name__ == '__main__':
+    app.run(debug=True, host="0.0.0.0")
