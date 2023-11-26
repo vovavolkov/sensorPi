@@ -1,9 +1,10 @@
 import base64
-from flask import Flask, render_template
-from io import BytesIO
-from matplotlib.figure import Figure
-import pandas as pd
 import sqlite3
+from io import BytesIO
+
+import pandas as pd
+from flask import Flask, render_template, request, redirect
+from matplotlib.figure import Figure
 
 app = Flask(__name__)
 
