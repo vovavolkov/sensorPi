@@ -91,7 +91,7 @@ except Exception:
 
 # Cleanup function - fills display with black, i.e. switches it off
 def cleanup(signal, frame):
-    conn.close()
+    connector.close()
     display.fill(0)
     display.show()
     print("\nDisplay turned off, changes committed.")
@@ -128,7 +128,7 @@ while True:
             f"INSERT INTO {args.table}"
             "(co2, temperature, humidity)"
             f"VALUES ({co2}, {temperature}, {humidity})")
-        conn.commit() 
+        connector.commit()
 
         # Skip the display if the -d(ark) flag is set
         if args.dark:
