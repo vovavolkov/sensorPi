@@ -7,20 +7,7 @@ from flask import Flask, render_template, request, redirect
 from matplotlib.figure import Figure
 
 app = Flask(__name__)
-
-conn = sqlite3.connect("db/tests.db")
-cursor = conn.cursor()
-cursor.execute("SELECT time, co2, temperature, humidity from readings")
-values = cursor.fetchall()
-
-times = [v[0] for v in values]
-co2 = [v[1] for v in values]
-temperature = [v[2] for v in values]
-humidity = [v[3] for v in values]
-
-times = pd.to_datetime(times)
-first_date = times[0].strftime("%Y-%m-%d")
-last_date = times[-1].strftime("%Y-%m-%d")
+table = "readings"
 
 
 def plot(x_axis, y_axis, x_label, y_label, title):
@@ -36,21 +23,31 @@ def plot(x_axis, y_axis, x_label, y_label, title):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    current_co2 = co2[-1]
-    co2_str = plot(times, co2, "date", "co2", "CO2 over time")
-    temp_str = plot(times, temperature, "date", "temperature", "Temperature over time")
-    hum_str = plot(times, humidity, "date", "humidity", "Humidity over time")
-    graphs = [co2_str, temp_str, hum_str]
-    return render_template(
-        'index.html', co2=current_co2, graphs=graphs, selected_date=date
-    )
-
-
-@app.route('/date', methods=['GET', 'POST'])
-def date():
+    global date
     if request.method == 'POST':
-        global date
         date = request.form['date']
         return redirect('/')
     else:
-        return render_template('date.html', first_date=first_date, last_date=last_date)
+        conn = sqlite3.connect("db/tests.db")
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT time, co2, temperature, humidity from {table}")
+        values = cursor.fetchall()
+
+        times = [v[0] for v in values]
+        co2 = [v[1] for v in values]
+        temperature = [v[2] for v in values]
+        humidity = [v[3] for v in values]
+
+        times = pd.to_datetime(times)
+        first_date = times[0]
+        last_date = times[-1]
+
+        current_co2 = co2[-1]
+        co2_str = plot(times, co2, "date", "co2", "CO2 over time")
+        temp_str = plot(times, temperature, "date", "temperature", "Temperature over time")
+        hum_str = plot(times, humidity, "date", "humidity", "Humidity over time")
+        graphs = [co2_str, temp_str, hum_str]
+        return render_template(
+            'index.html', co2=current_co2, graphs=graphs, selected_date=date,
+            first_date=first_date, last_date=last_date
+        )
