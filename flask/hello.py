@@ -11,7 +11,6 @@ app = Flask(__name__)
 conn = sqlite3.connect("db/tests.db")
 cursor = conn.cursor()
 cursor.execute("SELECT time, co2, temperature, humidity from readings")
-
 values = cursor.fetchall()
 
 times = [v[0] for v in values]
@@ -20,14 +19,12 @@ temperature = [v[2] for v in values]
 humidity = [v[3] for v in values]
 
 times = pd.to_datetime(times)
-
 first_date = times[0].strftime("%Y-%m-%d")
 last_date = times[-1].strftime("%Y-%m-%d")
 
 
 def plot(x_axis, y_axis, x_label, y_label, title):
     fig = Figure()
-
     ax = fig.subplots()
     ax.plot(x_axis, y_axis)
     ax.set(xlabel=x_label, ylabel=y_label, title=title)
