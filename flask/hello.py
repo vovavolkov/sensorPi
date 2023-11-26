@@ -23,7 +23,7 @@ def plot(x_axis, y_axis, x_label, y_label, title):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    conn = sqlite3.connect("db/tests.db")
+    conn = sqlite3.connect("db/readings.db")
     cursor = conn.cursor()
     cursor.execute(f"SELECT time, co2, temperature, humidity from {table}")
     values = cursor.fetchall()
