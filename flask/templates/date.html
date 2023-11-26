@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="/static/style.css"/>
+        <link rel="icon" href="/static/favicon.svg"/>
+        <title>sensorPi</title>
+    </head>
+    <body>
+        <p>
+            Enter a date to view the data from that day.
+        </p>
+        <form method="post">
+            <label for="title">Date</label>
+            <label>
+                <input type="date" name="date" max={{ last_date }} value={{ last_date }}>
+            </label>
+            <button type="submit">Submit</button>
+        </form>
+    </body>
+</html>
