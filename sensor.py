@@ -124,11 +124,13 @@ while True:
         humidity = round(scd4x.relative_humidity, 2)
 
         # Insert the new values into the table
-        cursor.execute(
-            f"INSERT INTO {args.table}"
-            "(co2, temperature, humidity)"
-            f"VALUES ({co2}, {temperature}, {humidity})")
-        connector.commit()
+        try:
+            cursor.execute(
+                f"INSERT INTO {args.table}"
+                "(co2, temperature, humidity)"
+                f"VALUES ({co2}, {temperature}, {humidity})")
+        except Exception as e:
+            print(e)
 
         # Skip the display if the -d(ark) flag is set
         if args.dark:
