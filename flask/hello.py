@@ -31,22 +31,24 @@ def index():
     cursor.execute(f"SELECT time from {table}")
     times = [t[0] for t in cursor.fetchall()]
     times = pd.to_datetime(times)
-    first_date = times[0].strftime("%Y-%m-%d")
-    last_date = times[-1].strftime("%Y-%m-%d")
-    date = last_date
+    min_date = times[0].strftime("%Y-%m-%d")
+    max_date = times[-1].strftime("%Y-%m-%d")
+    date = max_date
     if request.method == 'POST':
         date = request.form['date']
 
     cursor.execute(f"SELECT time, co2, temperature, humidity from {table} where time like '{date}%'")
+
     try:
         values = cursor.fetchall()
+        # select time but not date
         times = [v[0].split(" ")[1] for v in values]
         co2 = [v[1] for v in values]
         temperature = [v[2] for v in values]
         humidity = [v[3] for v in values]
         current_co2 = co2[-1]
     except IndexError:
-        current_co2 = 0
+        current_co2 = None
         times = []
         co2 = []
         temperature = []
@@ -58,5 +60,5 @@ def index():
     graphs = [co2_str, temp_str, hum_str]
     return render_template(
         'index.html', co2=current_co2, graphs=graphs, selected_date=date,
-        first_date=first_date, last_date=last_date
+        min_date=min_date, max_date=max_date
     )
