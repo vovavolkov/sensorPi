@@ -16,7 +16,8 @@ def plot(x_axis, y_axis, x_label, y_label, title):
     ax = fig.subplots()
     ax.plot(x_axis, y_axis)
     ax.set(xlabel=x_label, ylabel=y_label, title=title)
-    ax.set_xticks(ax.get_xticks()[::(len(x_axis) // 100)])
+    ax.set_xticks(ax.get_xticks()[::(len(x_axis) // 5)])
+    # save the figure to a buffer, then convert to base64
     buffer = BytesIO()
     fig.savefig(buffer, format="png")
     data = base64.b64encode(buffer.getbuffer()).decode("ascii")
