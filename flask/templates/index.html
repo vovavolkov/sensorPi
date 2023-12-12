@@ -1,27 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<link rel="stylesheet" href="/static/style.css"/>
-		<link rel="icon" href="/static/favicon.svg"/>
-		<title>sensorPi</title>
-	</head>
-	<body>
-        <h1>sensorPi</h1>
-        <p>
-            Select the date to view data from that day.
-        </p>
-        <form method="post">
-            <label for="title">Date</label>
-            <label>
-                <input type="date" name="date" min={{ min_date }} max={{ max_date }} value={{ max_date }}>
-            </label>
-            <button type="submit">Submit</button>
-        </form>
-        Selected date: {{ selected_date }}
-        <ul id="graphs">
-            {% for graph in graphs %}
-                <p><img src="{{graph}}" alt="image"></p>
-            {% endfor %}
-        </ul>
-	</body>
-</html>
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Home{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <p>
+        <a href="/auth/login">Admin panel</a>
+    </p>
+        Select the date to view data from that day.
+    <form method="post">
+        <label for="title">Date</label>
+        <label>
+            <input type="date" name="date" min={{ min_date }} max={{ max_date }} value={{ max_date }}>
+        </label>
+        <input type="submit" value="Submit">
+    </form>
+
+    Selected date: {{ selected_date }}
+    <ul id="graphs">
+        {% for graph in graphs %}
+            <p><img src="{{graph}}" alt="image"></p>
+        {% endfor %}
+    </ul>
+{% endblock %}
