@@ -5,7 +5,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from flaskyyy.db import get_db
+from sensorPi.db import get_db
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
