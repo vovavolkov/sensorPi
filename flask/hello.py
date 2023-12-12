@@ -20,8 +20,8 @@ def plot(x_axis, y_axis, x_label, y_label, title):
     # save the figure to a buffer, then convert to base64
     buffer = BytesIO()
     fig.savefig(buffer, format="png")
-    data = base64.b64encode(buffer.getbuffer()).decode("ascii")
-    return f"data:image/png;base64,{data}"
+    b64image = base64.b64encode(buffer.getbuffer()).decode("ascii")
+    return f"data:image/png;base64,{b64image}"
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -47,6 +47,7 @@ def index():
         temperature = [v[2] for v in values]
         humidity = [v[3] for v in values]
         current_co2 = co2[-1]
+
     except IndexError:
         current_co2 = None
         times = []
@@ -62,3 +63,13 @@ def index():
         'index.html', co2=current_co2, graphs=graphs, selected_date=date,
         min_date=min_date, max_date=max_date
     )
+
+
+@app.route('/auth/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == 'admin' and password == 'admin':
+            return redirect('/')
+    return render_template('auth/login.html')
