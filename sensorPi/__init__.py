@@ -11,12 +11,6 @@ def create_app(test_config=None):
         DATABASE=os.path.join(app.instance_path, 'readings.db'),
     )
 
-    from . import db
-    db.init_app(app)
-
-    from . import auth
-    app.register_blueprint(auth.bp)
-
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
@@ -29,6 +23,17 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    from . import db
+
+    db.init_app(app)
+
+    from . import auth
+    from . import blog
+
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(blog.bp)
+    app.add_url_rule('/', endpoint='index')
 
     # a simple page that says hello
     @app.route('/hello')
