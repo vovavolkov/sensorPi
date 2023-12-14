@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Admin Panel{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <h2>Create a new admin user</h2>
+    <form method="post" id="create">
+        <label for="username">Username</label>
+        <input name="username" id="username" required>
+        <br>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password"
+               pattern=(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{10,}
+               title="Please ensure the password contains at least one number and special character,
+            one lowercase and uppercase letter, and is 10 or more characters long."
+               required>
+        <br>
+        <input type="submit" value="Register" name="Register">
+    </form>
+    <br>
+    <h2>Change password</h2>
+    <form method="post">
+        <label for="current_password">Current Password</label>
+        <input type="password" name="current_password" id="current_password" required>
+        <br>
+        <label for="new_password">Password</label>
+        <input type="password" name="new_password" id="new_password"
+               pattern=(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{10,}
+               title="Please ensure the password contains at least one number and special character,
+            one lowercase and uppercase letter, and is 10 or more characters long."
+               required>
+        <br>
+        <input type="submit" value="Change" name="Change">
+    </form>
+{% endblock %}
