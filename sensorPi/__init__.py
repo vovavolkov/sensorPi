@@ -30,6 +30,10 @@ def create_app(test_config=None):
 
     from . import auth
     from . import blog
+    from . import hardware
+
+    hardware.init_app(app)
+    hardware.start_measuring()
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(blog.bp)
