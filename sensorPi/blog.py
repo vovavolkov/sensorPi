@@ -1,10 +1,10 @@
-from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for
-)
-from datetime import datetime
-from werkzeug.exceptions import abort
 
-from sensorPi.auth import login_required, change_password
+from flask import (
+    Blueprint, flash, redirect, render_template, request, url_for
+)
+from matplotlib.figure import Figure
+
+from sensorPi.auth import login_required, change_password, create_user
 from sensorPi.db import get_db
 
 bp = Blueprint('blog', __name__)
