@@ -1,3 +1,7 @@
+import base64
+import statistics
+from datetime import datetime, timedelta
+from io import BytesIO
 
 from flask import (
     Blueprint, flash, redirect, render_template, request, url_for
@@ -8,6 +12,19 @@ from sensorPi.auth import login_required, change_password, create_user
 from sensorPi.db import get_db
 
 bp = Blueprint('blog', __name__)
+
+
+def plot(x_axis, y_axis, x_label, y_label, title):
+    fig = Figure()
+    ax = fig.subplots()
+    ax.plot(x_axis, y_axis)
+    ax.set(xlabel=x_label, ylabel=y_label, title=title)
+    ax.set_xticks(ax.get_xticks()[::(len(x_axis) // 5)])
+    # save the figure to a buffer, then convert to base64
+    buffer = BytesIO()
+    fig.savefig(buffer, format="png")
+    b64image = base64.b64encode(buffer.getbuffer()).decode("ascii")
+    return f"data:image/png;base64,{b64image}"
 
 
 @bp.route('/')
