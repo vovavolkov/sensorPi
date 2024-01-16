@@ -27,6 +27,17 @@ def init_db():
     db.commit()
 
 
+def insert_readings(co2, temperature, humidity):
+    db = get_db()
+    try:
+        db.execute(
+            "INSERT INTO readings (co2, temperature, humidity) VALUES (?, ?, ?)",
+            (co2, temperature, humidity)
+        )
+    except Exception as e:
+        print(e)
+
+
 @click.command('init-db')
 def init_db_command():
     # Clear the existing data and create new tables.
@@ -39,7 +50,6 @@ def init_db_command():
 
 def close_db(e=None):
     db = g.pop('db', None)
-
     if db is not None:
         db.close()
 
