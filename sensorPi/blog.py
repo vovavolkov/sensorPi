@@ -37,8 +37,22 @@ def index():
         ' FROM readings'
         ' WHERE time >= ? and time < ?', (current_day, next_day,)
     ).fetchall()
+    times = [v[0].split(" ")[1] for v in values]
+    co2 = [v[1] for v in values]
+    temperature = [v[2] for v in values]
+    humidity = [v[3] for v in values]
 
-    return render_template('blog/index.html', )
+    co2_str = plot(times, co2, "date", "co2", "CO2 over time")
+    temp_str = plot(times, temperature, "date", "temperature", "Temperature over time")
+    hum_str = plot(times, humidity, "date", "humidity", "Humidity over time")
+    graphs = [co2_str, temp_str, hum_str]
+
+    co2_stdev = round(statistics.stdev(co2), 4)
+    temperature_stdev = round(statistics.stdev(temperature), 4)
+    humidity_stdev = round(statistics.stdev(humidity), 4)
+
+    return render_template('blog/index.html', graphs=graphs, co2_stdev=co2_stdev,
+                           temperature_stdev=temperature_stdev, humidity_stdev=humidity_stdev)
 
 
 @bp.route('/admin', methods=('GET', 'POST'))
