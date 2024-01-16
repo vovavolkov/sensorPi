@@ -30,11 +30,12 @@ def plot(x_axis, y_axis, x_label, y_label, title):
 @bp.route('/')
 def index():
     db = get_db()
-    date = datetime.now().strftime("%Y-%m-%d")
-    posts = db.execute(
+    current_day = datetime.now().strftime("%Y-%m-%d")
+    next_day = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
+    values = db.execute(
         'SELECT time, co2, temperature, humidity'
         ' FROM readings'
-        ' where time like ?', (date,)
+        ' WHERE time >= ? and time < ?', (current_day, next_day,)
     ).fetchall()
 
     return render_template('blog/index.html', )
