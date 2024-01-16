@@ -34,6 +34,7 @@ def insert_readings(co2, temperature, humidity):
             "INSERT INTO readings (co2, temperature, humidity) VALUES (?, ?, ?)",
             (co2, temperature, humidity)
         )
+        db.commit()
     except Exception as e:
         print(e)
 
