@@ -58,38 +58,23 @@ def index():
 @bp.route('/admin', methods=('GET', 'POST'))
 @login_required
 def admin():
-    # TODO: create new users?
     # check each of two possible forms
     if request.method == 'POST':
         if 'Register' in request.form:
             username = request.form['username']
             password = request.form['password']
-            error = None
-
-            if not username:
-                error = 'Username is required.'
-            elif not password:
-                error = 'Password is required.'
-
-            if error is None:
-                try:
-                    db.execute(
-                        "INSERT INTO user (username, password) VALUES (?, ?)",
-                        (username, generate_password_hash(password, method='pbkdf2:sha3_512', salt_length=8))
-                    )
-                    db.commit()
-                except db.IntegrityError:
-                    error = f"User {username} is already registered."
-                else:
-                    return redirect(url_for("auth.login"))
-
+            error = create_user(username, password)
             flash(error)
-        elif 'Change' in request.form:
+        if 'Change' in request.form:
             current_password = request.form['current_password']
             new_password = request.form['new_password']
             error = change_password(current_password, new_password)
             if error is None:
                 return redirect(url_for('auth.login'))
             flash(error)
+    db = get_db()
+    admins = db.execute(
+        'SELECT username FROM user'
+    ).fetchall()
 
-    return render_template('blog/admin.html')
+    return render_template('blog/admin.html', admins=admins)
