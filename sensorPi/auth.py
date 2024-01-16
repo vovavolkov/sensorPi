@@ -82,3 +82,25 @@ def login_required(view):
         return view(**kwargs)
 
     return wrapped_view
+
+
+def change_password(current_password, new_password):
+    db = get_db()
+    uid = session.get('user_id')
+    error = None
+    user = db.execute(
+        'SELECT * FROM user WHERE id = ?', (uid,)
+    ).fetchone()
+
+    if not check_password_hash(user['password'], current_password):
+        error = 'Current password is invalid.'
+
+    if error is None:
+        db.execute(
+            "UPDATE user SET password = ? WHERE id = ?",
+            (generate_password_hash(new_password, method='pbkdf2:sha3_512', salt_length=8), uid)
+        )
+        db.commit()
+
+    return error
+
