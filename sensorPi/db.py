@@ -27,8 +27,7 @@ def init_db():
     db.commit()
 
 
-def insert_readings(co2, temperature, humidity):
-    db = get_db()
+def insert_readings(co2, temperature, humidity, db):
     try:
         db.execute(
             "INSERT INTO readings (co2, temperature, humidity) VALUES (?, ?, ?)",

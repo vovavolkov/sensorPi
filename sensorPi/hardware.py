@@ -92,13 +92,15 @@ def display_strings(strings):
     display.show()
 
 
-def start_measuring():
+def start_measuring(db):
     def background():
+
         init_display()
         sensor = init_sensor()
         if sensor is None:
             display_strings(["Sensor not found"])
             return None
+
         # Launch the sensor's periodic measurement
         sensor.start_periodic_measurement()
 
@@ -110,7 +112,7 @@ def start_measuring():
                 humidity = round(sensor.relative_humidity, 2)
 
                 # Insert the new values into the table
-                insert_readings(co2, temperature, humidity)
+                insert_readings(co2, temperature, humidity, db)
 
                 # Skip the display if the -d(ark) flag is set
                 if not dark:

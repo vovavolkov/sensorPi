@@ -27,13 +27,14 @@ def create_app(test_config=None):
     from . import db
 
     db.init_app(app)
+    db = db.get_db()
 
     from . import auth
     from . import blog
     from . import hardware
 
     hardware.init_app(app)
-    hardware.start_measuring()
+    hardware.start_measuring(db)
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(blog.bp)
