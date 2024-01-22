@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
 import argparse
+import threading
+import time
 import signal
 import sqlite3
-import time
 
 import adafruit_scd4x
 import adafruit_ssd1305
@@ -24,15 +25,6 @@ parser.add_argument(
 args = parser.parse_args()
 print(args)
 
-# Connect to the database 'readings.db'
-connector = sqlite3.connect('db/readings.db')
-cursor = connector.cursor()
-# Create a table specified in command arguments, if it doesn't exist
-cursor.execute(
-    f"CREATE TABLE IF NOT EXISTS {args.table}"
-    "(id INTEGER PRIMARY KEY AUTOINCREMENT,"
-    "co2 INTEGER, temperature REAL, humidity REAL,"
-    "time DATETIME DEFAULT CURRENT_TIMESTAMP)")
 
 # Define the Reset Pin for the display
 oled_reset = digitalio.DigitalInOut(D4)
@@ -63,7 +55,7 @@ def clear_canvas():
 
 
 # Load a .ttf font
-font = ImageFont.truetype('assets/Minecraftia-Regular.ttf', 8)
+font = ImageFont.truetype('/home/pi/Minecraftia-Regular.ttf', 8)
 
 
 # Define a function to print out a string with a pixel offset from top
@@ -91,7 +83,6 @@ except Exception:
 
 # Cleanup function - fills display with black, i.e. switches it off
 def cleanup(signal, frame):
-    connector.close()
     display.fill(0)
     display.show()
     print("\nDisplay turned off, changes committed.")
@@ -114,38 +105,53 @@ def toggle_display(signal, frame):
 # Display toggle is triggered by kill -USR1 signal.
 signal.signal(signal.SIGUSR1, toggle_display)
 
-scd4x.start_periodic_measurement()
 
-while True:
-    if scd4x.data_ready:
-        # Fetch the readings from the sensor
-        co2 = scd4x.CO2
-        temperature = round(scd4x.temperature, 4)
-        humidity = round(scd4x.relative_humidity, 2)
+def background():
+    # Connect to the database 'readings.db'
+    connector = sqlite3.connect('db/readings.db')
+    cursor = connector.cursor()
+    # Create a table specified in command arguments, if it doesn't exist
+    cursor.execute(
+        f"CREATE TABLE IF NOT EXISTS {args.table}"
+        "(id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "co2 INTEGER, temperature REAL, humidity REAL,"
+        "time DATETIME DEFAULT CURRENT_TIMESTAMP)")
 
-        # Insert the new values into the table
-        try:
-            cursor.execute(
-                f"INSERT INTO {args.table}"
-                "(co2, temperature, humidity)"
-                f"VALUES ({co2}, {temperature}, {humidity})")
-        except Exception as e:
-            print(e)
+    scd4x.start_periodic_measurement()
+    while True:
+        if scd4x.data_ready:
+            # Fetch the readings from the sensor
+            co2 = scd4x.CO2
+            temperature = round(scd4x.temperature, 4)
+            humidity = round(scd4x.relative_humidity, 2)
 
-        # Skip the display if the -d(ark) flag is set
-        if args.dark:
-            continue
-            
-        clear_canvas()
-        # Add text strings to the canvas
-        draw_string(0, "Sensor OK")
-        draw_string(8, f"CO2: {co2} ppm")
-        draw_string(16, f"Temp: {temperature} *C")
-        draw_string(25, f"Hum: {humidity} %")
+            # Insert the new values into the table
+            try:
+                cursor.execute(
+                    f"INSERT INTO {args.table}"
+                    "(co2, temperature, humidity)"
+                    f"VALUES ({co2}, {temperature}, {humidity})")
+                connector.commit()
+            except Exception as e:
+                print(e)
 
-        # Push the canvas onto the display
-        display.image(image)
-        display.show()
+            # Skip the display if the -d(ark) flag is set
+            if args.dark:
+                continue
+                
+            clear_canvas()
+            # Add text strings to the canvas
+            draw_string(0, "Sensor OK")
+            draw_string(8, f"CO2: {co2} ppm")
+            draw_string(16, f"Temp: {temperature} *C")
+            draw_string(25, f"Hum: {humidity} %")
 
-    # Wait for 1 second before repeating
-    time.sleep(1)
+            # Push the canvas onto the display
+            display.image(image)
+            display.show()
+
+        # Wait for 1 second before repeating
+        time.sleep(1)
+
+b = threading.Thread(name='background', target=background)
+b.start()
