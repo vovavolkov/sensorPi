@@ -1,5 +1,5 @@
 import time
-from signal import signal, SIGINT, SIGTERM, SIGUSR1
+import threading
 
 import adafruit_scd4x
 import board
@@ -93,39 +93,40 @@ def display_strings(strings):
 
 
 def start_measuring():
-    global display
-    init_display()
-    sensor = init_sensor()
-    if sensor is None:
-        display_strings(["Sensor not found"])
-        exit(1)
+    def background():
+        init_display()
+        sensor = init_sensor()
+        if sensor is None:
+            display_strings(["Sensor not found"])
+            return None
+        # Launch the sensor's periodic measurement
+        sensor.start_periodic_measurement()
 
-    # Launch the sensor's periodic measurement
-    sensor.start_periodic_measurement()
-    while True:
-        if sensor.data_ready:
-            # Fetch the readings from the sensor
-            co2 = sensor.CO2
-            temperature = round(sensor.temperature, 4)
-            humidity = round(sensor.relative_humidity, 2)
+        while True:
+            if sensor.data_ready:
+                # Fetch the readings from the sensor
+                co2 = sensor.CO2
+                temperature = round(sensor.temperature, 4)
+                humidity = round(sensor.relative_humidity, 2)
 
-            # Insert the new values into the table
-            insert_readings(co2, temperature, humidity)
+                # Insert the new values into the table
+                insert_readings(co2, temperature, humidity)
 
-            # Skip the display if the -d(ark) flag is set
-            if dark:
-                continue
+                # Skip the display if the -d(ark) flag is set
+                if not dark:
+                    display_strings([
+                            "Sensor OK",
+                            f"CO2: {co2} ppm",
+                            f"Temp: {temperature} *C",
+                            f"Hum: {humidity} %"
+                        ]
+                    )
+            # Wait for 1 second before repeating
+            time.sleep(1)
 
-            display_strings([
-                    "Sensor OK",
-                    f"CO2: {co2} ppm",
-                    f"Temp: {temperature} *C",
-                    f"Hum: {humidity} %"
-                ]
-            )
-
-        # Wait for 1 second before repeating
-        time.sleep(1)
+    b = threading.Thread(name='background', target=background)
+    b.start()
+    return b
 
 
 def init_app(app):
