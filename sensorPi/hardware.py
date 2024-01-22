@@ -38,7 +38,7 @@ def init_display():
     image = Image.new("1", (width, height))
     # Get drawing object to draw on image
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype('static/Minecraftia-Regular.ttf', 8)
+    font = ImageFont.truetype('sensorPi/static/Minecraftia-Regular.ttf', 8)
 
 
 def init_sensor():
@@ -93,42 +93,36 @@ def display_strings(strings):
 
 
 def start_measuring(db):
-    def background():
+    init_display()
+    sensor = init_sensor()
+    if sensor is None:
+        display_strings(["Sensor not found"])
+        return None
 
-        init_display()
-        sensor = init_sensor()
-        if sensor is None:
-            display_strings(["Sensor not found"])
-            return None
+    # Launch the sensor's periodic measurement
+    sensor.start_periodic_measurement()
 
-        # Launch the sensor's periodic measurement
-        sensor.start_periodic_measurement()
+    while True:
+        if sensor.data_ready:
+            # Fetch the readings from the sensor
+            co2 = sensor.CO2
+            temperature = round(sensor.temperature, 4)
+            humidity = round(sensor.relative_humidity, 2)
 
-        while True:
-            if sensor.data_ready:
-                # Fetch the readings from the sensor
-                co2 = sensor.CO2
-                temperature = round(sensor.temperature, 4)
-                humidity = round(sensor.relative_humidity, 2)
+            # Insert the new values into the table
+            insert_readings(co2, temperature, humidity, db)
 
-                # Insert the new values into the table
-                insert_readings(co2, temperature, humidity, db)
-
-                # Skip the display if the -d(ark) flag is set
-                if not dark:
-                    display_strings([
-                            "Sensor OK",
-                            f"CO2: {co2} ppm",
-                            f"Temp: {temperature} *C",
-                            f"Hum: {humidity} %"
-                        ]
-                    )
-            # Wait for 1 second before repeating
-            time.sleep(1)
-
-    b = threading.Thread(name='background', target=background)
-    b.start()
-    return b
+            # Skip the display if the -d(ark) flag is set
+            if not dark:
+                display_strings([
+                        "Sensor OK",
+                        f"CO2: {co2} ppm",
+                        f"Temp: {temperature} *C",
+                        f"Hum: {humidity} %"
+                    ]
+                )
+        # Wait for 1 second before repeating
+        time.sleep(1)
 
 
 def init_app(app):

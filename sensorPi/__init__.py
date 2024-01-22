@@ -1,4 +1,5 @@
 import os
+import threading
 
 from flask import Flask
 
@@ -27,17 +28,25 @@ def create_app(test_config=None):
     from . import db
 
     db.init_app(app)
-    db = db.get_db()
 
     from . import auth
     from . import blog
     from . import hardware
 
+
     hardware.init_app(app)
-    hardware.start_measuring(db)
+
+
+    #def background():
+    with app.app_context():
+        db = db.get_db()
+        hardware.start_measuring(db)
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(blog.bp)
     app.add_url_rule('/', endpoint='index')
+
+    #b = threading.Thread(name='background', target=background)
+    #b.start()
 
     return app
