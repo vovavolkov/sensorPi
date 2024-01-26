@@ -124,6 +124,5 @@ def start_measuring(db):
         # Wait for 1 second before repeating
         time.sleep(1)
 
-
 def init_app(app):
     app.teardown_appcontext(cleanup)
