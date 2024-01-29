@@ -79,10 +79,7 @@ def cleanup():
 # signal(SIGINT, cleanup)
 # signal(SIGTERM, cleanup)
 
-# Load a .ttf font
-
-
-# Define a function to print out a string with a pixel offset from top left
+# Define a function to print out a string with a pixel offset from top
 def display_strings(strings):
     # Draw a black filled box to clear the canvas for draw method
     draw.rectangle((0, 0, display.width, display.height), outline=0, fill=0)
@@ -98,10 +95,8 @@ def start_measuring(db):
     if sensor is None:
         display_strings(["Sensor not found"])
         return None
-
     # Launch the sensor's periodic measurement
     sensor.start_periodic_measurement()
-
     while True:
         if sensor.data_ready:
             # Fetch the readings from the sensor
@@ -123,6 +118,7 @@ def start_measuring(db):
                 )
         # Wait for 1 second before repeating
         time.sleep(1)
+
 
 def init_app(app):
     app.teardown_appcontext(cleanup)
