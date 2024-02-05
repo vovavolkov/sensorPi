@@ -101,4 +101,3 @@ def change_password(current_password, new_password):
         db.commit()
 
     return error
-

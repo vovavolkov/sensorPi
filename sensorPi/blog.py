@@ -14,16 +14,22 @@ from sensorPi.db import get_db
 bp = Blueprint('blog', __name__)
 
 
+# create a plot for readings
 def plot(x_axis, y_axis, x_label, y_label, title):
+    # create a figure object and add axes
     fig = Figure()
     ax = fig.subplots()
+    # plot the data onto the axes (x-axis is time, y-axis is the value)
     ax.plot(x_axis, y_axis)
+    # label the axes and add a title
     ax.set(xlabel=x_label, ylabel=y_label, title=title)
+    # every (len / 5)th tick is shown, to avoid clutter
     ax.set_xticks(ax.get_xticks()[::(len(x_axis) // 5)])
     # save the figure to a buffer, then convert to base64
     buffer = BytesIO()
     fig.savefig(buffer, format="png")
     b64image = base64.b64encode(buffer.getbuffer()).decode("ascii")
+    # return the base64 string to be used in the html
     return f"data:image/png;base64,{b64image}"
 
 
@@ -37,6 +43,8 @@ def index():
         ' FROM readings'
         ' WHERE time >= ? and time < ?', (current_day, next_day,)
     ).fetchall()
+    if len(values) == 0:
+        return render_template('blog/index.html')
     times = [v[0].split(" ")[1] for v in values]
     co2 = [v[1] for v in values]
     temperature = [v[2] for v in values]

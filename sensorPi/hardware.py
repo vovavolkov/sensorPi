@@ -72,7 +72,6 @@ def cleanup():
     display.fill(0)
     display.show()
     print("\nDisplay turned off, changes committed.")
-    exit(0)
 
 
 # # Register the cleanup function to run when the script is terminated

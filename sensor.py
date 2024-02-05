@@ -153,5 +153,6 @@ def background():
         # Wait for 1 second before repeating
         time.sleep(1)
 
+
 b = threading.Thread(name='background', target=background)
 b.start()
