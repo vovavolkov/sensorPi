@@ -12,8 +12,15 @@ body {
 
 h1 {
     font-family: serif;
-    color: #59af31;
+    color: limegreen;
     margin: 1rem 0;
+    font-size: 200%;
+}
+
+h2 {
+    color:green;
+    margin: 1rem 0;
+    font-size: 150%;
 }
 
 
@@ -40,7 +47,7 @@ nav h1 {
 }
 
 nav h1 a {
-    color: #59af31;
+    color: inherit;
     text-decoration: none;
     padding: 0.25rem 0.5rem;
 }
@@ -63,11 +70,6 @@ nav ul li a, nav ul li span, header .action {
     margin: 0 auto;
 }
 
-.logo {
-    max-width: 2em;
-    height: auto;
-}
-
 .flash {
     background: #fff;
     color: #ff0000;
@@ -87,8 +89,4 @@ h1, h2, h3 {
 
 label{
     display: flex;
-}
-input {
-  display: inline-block;
-  float: left;
 }
