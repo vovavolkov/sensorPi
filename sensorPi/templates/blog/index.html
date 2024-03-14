@@ -5,29 +5,17 @@
 {% endblock %}
 
 {% block content %}
-        Select the date to view data from that day.
-    <!--<form method="post">
-        <label for="title">Date</label>
-        <label>
-            <input type="date" name="date" min={{ min_date }} max={{ max_date }} value={{ max_date }}>
-        </label>
-        <input type="submit" value="Submit">
-    </form>-->
-
-    <!--Selected date: {{ selected_date }}-->
-
-    <img src="{{ url_for('static', filename='dog.jpeg') }}" alt="dog">
+    <h2>Graphs</h2>
     <ul id="graphs">
         {% for graph in graphs %}
-            <p><img src="{{graph}}" alt="image"></p>
+            <figure>
+                <img src="{{ graph }}" alt="image">
+            </figure>
         {% endfor %}
     </ul>
     <ul id="stats">
-         co2 standard deviation: {{ co2_stdev }}
-            <br>
-    temperature standard deviation: {{ temperature_stdev }}
-            <br>
-    humidity standard deviation: {{ humidity_stdev }}
-            <br>
+        <li> co2 standard deviation: {{ co2_stdev }} </li>
+        <li> temperature standard deviation: {{ temperature_stdev }} </li>
+        <li> humidity standard deviation: {{ humidity_stdev }} </li>
     </ul>
 {% endblock %}
