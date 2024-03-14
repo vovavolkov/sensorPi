@@ -1,5 +1,4 @@
 import time
-import threading
 
 import adafruit_scd4x
 import board
@@ -52,33 +51,13 @@ def init_sensor():
         return None
 
 
-# Function switches value of args.dark, i.e. switches the display on/off
-# def toggle_display(signal, frame):
-#     global dark
-#     dark = not dark
-#
-#     print("Display is now:", "OFF" if dark else "ON")
-#     display.fill(0)
-#     display.show()
-
-
-# Display toggle is triggered by kill -USR1 signal.
-# signal(SIGUSR1, toggle_display)
-
-
 # Cleanup function - fills display with black, i.e. switches it off
-
 def cleanup():
     display.fill(0)
     display.show()
-    print("\nDisplay turned off, changes committed.")
 
 
-# # Register the cleanup function to run when the script is terminated
-# signal(SIGINT, cleanup)
-# signal(SIGTERM, cleanup)
-
-# Define a function to print out a string with a pixel offset from top
+# Define a function to print out up to 4 lines(strings) to the display
 def display_strings(strings):
     # Draw a black filled box to clear the canvas for draw method
     draw.rectangle((0, 0, display.width, display.height), outline=0, fill=0)
