@@ -35,44 +35,56 @@ def plot(x_axis, y_axis, x_label, y_label, title):
 
 @bp.route('/')
 def index():
+    # get the database and the current day
     db = get_db()
     current_day = datetime.now().strftime("%Y-%m-%d")
+    # get the next day – to limit the readings to today
     next_day = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
+    # get the readings from the database
     values = db.execute(
         'SELECT time, co2, temperature, humidity'
         ' FROM readings'
         ' WHERE time >= ? and time < ?', (current_day, next_day,)
     ).fetchall()
+    # if there are no readings, return the empty index page
     if len(values) == 0:
         return render_template('blog/index.html')
+    # split the values 2d array into separate lists
     times = [v[0].split(" ")[1] for v in values]
     co2 = [v[1] for v in values]
     temperature = [v[2] for v in values]
     humidity = [v[3] for v in values]
 
+    # for each reading, create a plot and add it to the list of graphs
     co2_str = plot(times, co2, "date", "co2", "CO2 over time")
     temp_str = plot(times, temperature, "date", "temperature", "Temperature over time")
     hum_str = plot(times, humidity, "date", "humidity", "Humidity over time")
     graphs = [co2_str, temp_str, hum_str]
 
+    # for each reading, calculate the standard deviation
     co2_stdev = round(statistics.stdev(co2), 4)
     temperature_stdev = round(statistics.stdev(temperature), 4)
     humidity_stdev = round(statistics.stdev(humidity), 4)
 
+    # return the index page with the graphs and standard deviations passed as arguments
     return render_template('blog/index.html', graphs=graphs, co2_stdev=co2_stdev,
                            temperature_stdev=temperature_stdev, humidity_stdev=humidity_stdev)
 
 
+# admin page – register new users and change the password
 @bp.route('/admin', methods=('GET', 'POST'))
+# only users which are logged in can access the admin page
 @login_required
 def admin():
     # check each of two possible forms
     if request.method == 'POST':
+        # if the register form is submitted, create a new user, using the create_user from auth.py
         if 'Register' in request.form:
             username = request.form['username']
             password = request.form['password']
             error = create_user(username, password)
             flash(error)
+            # if the change form is submitted, change the password, using the change_password from auth.py
         if 'Change' in request.form:
             current_password = request.form['current_password']
             new_password = request.form['new_password']
@@ -80,9 +92,10 @@ def admin():
             if error is None:
                 return redirect(url_for('auth.login'))
             flash(error)
+    # get the database and the list of all users
     db = get_db()
     admins = db.execute(
         'SELECT username FROM user'
     ).fetchall()
-
+    # TODO: add ability to download sql database from instance folder
     return render_template('blog/admin.html', admins=admins)
