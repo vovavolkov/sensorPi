@@ -11,7 +11,7 @@ from matplotlib.figure import Figure
 from sensorPi.auth import login_required, change_password, create_user
 from sensorPi.db import get_db
 
-bp = Blueprint('blog', __name__)
+bp = Blueprint('graphs', __name__)
 
 
 # create a plot for readings
@@ -36,10 +36,34 @@ def plot(x_axis, y_axis, x_label, y_label, title):
 @bp.route('/')
 def index():
     # get the database and the current day
+    current_day = datetime.now()
+    current_day = current_day.strftime("%Y-%m-%d")
+    print(current_day)
+
+    # return the index page with the graphs and standard deviations passed as arguments
+    return render_template('graphs/index.html', current_day=current_day)
+
+
+@bp.route('/graph/<date>')
+def graph_day(date):
+    # get the database and the current day from the url
     db = get_db()
-    current_day = datetime.now().strftime("%Y-%m-%d")
+    current_day = date
+    # convert the date to a datetime object
+    # try catch block to handle invalid date
+    try:
+        current_day = datetime.strptime(current_day, '%Y-%m-%d')
+    except ValueError:
+        flash("Invalid date")
+        return render_template('graphs/graph.html')
     # get the next day – to limit the readings to today
-    next_day = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
+    next_day = current_day + timedelta(days=1)
+    prev_day = current_day - timedelta(days=1)
+    prev_day = prev_day.strftime("%Y-%m-%d")
+    current_day_str = current_day.strftime("%-d %B %Y")
+    next_day = next_day.strftime("%Y-%m-%d")
+    print(prev_day, current_day, next_day)
+
     # get the readings from the database
     values = db.execute(
         'SELECT time, co2, temperature, humidity'
@@ -48,7 +72,8 @@ def index():
     ).fetchall()
     # if there are no readings, return the empty index page
     if len(values) == 0:
-        return render_template('blog/index.html')
+        flash("No readings for this day")
+        return render_template('graphs/graph.html', prev_day=prev_day, current_day=current_day_str, next_day=next_day)
     # split the values 2d array into separate lists
     times = [v[0].split(" ")[1] for v in values]
     co2 = [v[1] for v in values]
@@ -67,8 +92,9 @@ def index():
     humidity_stdev = round(statistics.stdev(humidity), 4)
 
     # return the index page with the graphs and standard deviations passed as arguments
-    return render_template('blog/index.html', graphs=graphs, co2_stdev=co2_stdev,
-                           temperature_stdev=temperature_stdev, humidity_stdev=humidity_stdev)
+    return render_template('graphs/graph.html', graphs=graphs, co2_stdev=co2_stdev,
+                           temperature_stdev=temperature_stdev, humidity_stdev=humidity_stdev,
+                           prev_day=prev_day, current_day=current_day_str, next_day=next_day)
 
 
 # admin page – register new users and change the password
