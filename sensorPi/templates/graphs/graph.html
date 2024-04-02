@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>
+        {% block title %}
+            {% if graphs %}
+                Graphs for {{current_day}}
+            {% else %}
+                No Graphs for {{current_day}}
+            {% endif %}
+        {% endblock %}
+    </h1>
+{% endblock %}
+
+{% block content %}
+     <!-- show previous and next day links -->
+    <p><a href="{{url_for('graphs.graph_day', date=prev_day)}}"> previous day: {{prev_day}}</a></p>
+    <p><a href="{{url_for('graphs.graph_day', date=next_day)}}"> next day: {{next_day}}</a></p>
+
+    <!-- only show layout if there are graphs -->
+    {% if graphs %}
+        <h2>Graphs</h2>
+        <ul id="graphs">
+        <!-- loop through graphs and display them -->
+            {% for graph in graphs %}
+                <figure>
+                    <img src="{{ graph }}" alt="image">
+                </figure>
+            {% endfor %}
+        </ul>
+        <h2> Statistics </h2>
+        <ul id="stats">
+        <!-- display statistics -->
+            <li>CO2 standard deviation: {{ co2_stdev }}</li>
+            <li>Temperature standard deviation: {{ temperature_stdev }}</li>
+            <li>Humidity standard deviation: {{ humidity_stdev }}</li>
+        </ul>
+    {% endif %}
+
+{% endblock %}
