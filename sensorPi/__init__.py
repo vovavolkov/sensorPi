@@ -40,24 +40,27 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import auth, db, blog, hardware
+    from . import auth, db, graphs
 
     db.init_app(app)
     app.register_blueprint(auth.bp)
-    app.register_blueprint(blog.bp)
+    app.register_blueprint(graphs.bp)
     app.add_url_rule('/', endpoint='index')
 
-    hardware.init_app(app)
+    if not app.config['DEBUG']:
+        from . import hardware
+        hardware.init_app(app)
 
-    # threading – background function
-    def background():
-        # wrap the hardware module with app context, allowing it to use the db
-        with app.app_context():
-            my_database = db.get_db()
-            hardware.start_measuring(my_database)
+        # threading – background function
+        def background():
+            # wrap the hardware module with app context, allowing it to use the db
+            with app.app_context():
+                my_database = db.get_db()
+                hardware.start_measuring(my_database)
 
-    # start a background thread with hardware interaction module
-    b = threading.Thread(name='background', target=background)
-    b.start()
+        # start a background thread with hardware interaction module
+        b = threading.Thread(name='background', target=background)
+        b.daemon = True
+        b.start()
 
     return app
