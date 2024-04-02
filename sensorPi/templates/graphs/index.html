@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>
+        {% block title %}
+            Home Page
+        {% endblock %}
+    </h1>
+{% endblock %}
+
+{% block content %}
+    <b>Welcome to the home page!</b>
+
+     <p>Graphs and stats for today:
+        <a href="{{ url_for('graphs.graph_day', date=current_day) }}"> {{ current_day }} </a> </p>
+
+    <p>This is the home page for sensorPi. If you are an admin, log in at the top right corner to see the admin
+        panel.</p>
+
+    <p>This project is a web application that displays data from a Raspberry Pi with SCD-40 sensor.
+        The data, such as temperature, humidity and CO2 levels, is collected every ~5 seconds and stored in a database.
+        The data is then displayed in graphs and stats on this website.</p>
+
+    <p>You can navigate to the graphs page to see the data for today.
+        From there you could use hyperlinks to see the data for other days.
+        Alternatively, just type add '/graphs/YYYY-MM-DD' to the URL to see the data for that day.</p>
+
+    <p>If you have any questions or suggestions, please contact me at: vova.volkov@pocklingtonschool.com</p>
+{% endblock %}

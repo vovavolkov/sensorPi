@@ -124,4 +124,4 @@ def admin():
         'SELECT username FROM user'
     ).fetchall()
     # TODO: add ability to download sql database from instance folder
-    return render_template('blog/admin.html', admins=admins)
+    return render_template('graphs/admin.html', admins=admins)
