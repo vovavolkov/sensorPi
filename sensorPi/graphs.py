@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 
 from flask import (
-    Blueprint, flash, redirect, render_template, request, url_for
+    Blueprint, flash, redirect, render_template, request, url_for, send_file
 )
 from matplotlib.figure import Figure
 
@@ -118,10 +118,27 @@ def admin():
             if error is None:
                 return redirect(url_for('auth.login'))
             flash(error)
+        if 'Download' in request.form:
+            return redirect(url_for('graphs.download'))
     # get the database and the list of all users
     db = get_db()
     admins = db.execute(
         'SELECT username FROM user'
     ).fetchall()
-    # TODO: add ability to download sql database from instance folder
     return render_template('graphs/admin.html', admins=admins)
+
+
+@bp.route('/admin/download', methods=('GET', 'POST'))
+@login_required
+def download():
+    db = get_db()
+    # get the database and the list of all users
+    data = db.execute(
+        'SELECT * FROM readings'
+    ).fetchall()
+    # create a csv file from the readings
+    csv = "time,co2,temperature,humidity\n"
+    for row in data:
+        csv += f"{row['time']},{row['co2']},{row['temperature']},{row['humidity']}\n"
+    # return the csv file to be downloaded
+    return send_file(BytesIO(csv.encode()), as_attachment=True, download_name="readings.csv")
