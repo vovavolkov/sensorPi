@@ -14,8 +14,8 @@
 
 {% block content %}
      <!-- show previous and next day links -->
-    <p><a href="{{url_for('graphs.graph_day', date=prev_day)}}"> previous day: {{prev_day}}</a></p>
-    <p><a href="{{url_for('graphs.graph_day', date=next_day)}}"> next day: {{next_day}}</a></p>
+    <p><a href="{{url_for('graphs.graph_day', date=prev_day)}}"> Previous day: {{prev_day}}</a></p>
+    <p><a href="{{url_for('graphs.graph_day', date=next_day)}}"> Next day: {{next_day}}</a></p>
 
     <!-- only show layout if there are graphs -->
     {% if graphs %}
