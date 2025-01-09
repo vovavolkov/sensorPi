@@ -19,7 +19,7 @@ h1 {
 
 h2 {
     color:green;
-    margin: 1rem 0;
+    margin: 2rem 0 0.25rem;
     font-size: 150%;
 }
 
@@ -89,4 +89,8 @@ h1, h2, h3 {
 
 label{
     display: flex;
+}
+
+form{
+    margin: 0 1rem;
 }

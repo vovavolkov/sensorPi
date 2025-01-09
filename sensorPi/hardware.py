@@ -82,8 +82,11 @@ def start_measuring(db):
             temperature = round(sensor.temperature, 4)
             humidity = round(sensor.relative_humidity, 2)
 
-            # Insert the new values into the table
-            insert_readings(co2, temperature, humidity, db)
+            # Insert the new values into the table, validating them
+            if not 400 <= co2 <= 2000 or not 0 <= humidity <= 100:
+                display_strings(["Sensor Error"])
+            else:
+                insert_readings(co2, temperature, humidity, db)
 
             # Skip the display if the -d(ark) flag is set
             if not dark:
